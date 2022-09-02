@@ -1,0 +1,12 @@
+{
+  "name": "CrossChat",
+  "description": "CrossChat extension.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "content_scripts": [
+    {
+      "matches": ["https://*.youtube.com/*", "https://*.twitch.tv/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

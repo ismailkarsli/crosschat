@@ -20,7 +20,7 @@
     axios "^0.21.1"
     tslib "^1.11.1"
 
-"@tauri-apps/api@^1.0.2":
+"@tauri-apps/api@>=1.0.0", "@tauri-apps/api@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.0.2.tgz#5228720e35d50fd08df87067dc29e7306c1f7a10"
   integrity sha512-yuNW0oeJ1/ZA7wNF1KgxhHrSu5viPVzY/UgUczzN5ptLM8dH15Juy5rEGkoHfeXGju90Y/l22hi3BtIrp/za+w==
@@ -257,7 +257,14 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-axios@*, axios@^0.27.2:
+axios-tauri-adapter@ismailkarsli/axios-tauri-adapter:
+  version "0.0.1"
+  resolved "https://codeload.github.com/ismailkarsli/axios-tauri-adapter/tar.gz/3c0b408a494887a6966ca7ef9dc1414dd448d69b"
+  dependencies:
+    "@tauri-apps/api" ">=1.0.0"
+    axios ">=0.20.0"
+
+axios@*, axios@>=0.20.0, axios@^0.27.2:
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
   integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==

@@ -2,7 +2,7 @@ import { ServiceEmitter, ServiceName } from ".";
 import dayjs from "../plugins/dayjs";
 import { LiveChat } from "youtube-chat";
 import axios from "axios";
-import axiosTauriAdapter from "../plugins/axios-tauri-adapter";
+import axiosTauriAdapter from "axios-tauri-adapter";
 
 const { GOOGLE_API_KEY, GOOGLE_OAUTH_TOKEN } = import.meta.env;
 
@@ -20,6 +20,7 @@ export default class Youtube extends ServiceEmitter {
     super();
     this.ytClient = new LiveChat({
       channelId,
+      // @ts-ignore
       axiosInstance: axios.create({ adapter: axiosTauriAdapter }),
     });
 

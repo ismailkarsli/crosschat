@@ -21,7 +21,8 @@
     "tmi.js": "^1.8.5",
     "typed-emitter": "^2.1.0",
     "vue": "^3.2.37",
-    "youtube-chat": "ismailkarsli/youtube-chat"
+    "youtube-chat": "ismailkarsli/youtube-chat",
+    "axios-tauri-adapter": "ismailkarsli/axios-tauri-adapter"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.0.5",

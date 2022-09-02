@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import Dlive from "../services/dlive";
 import Twitch from "../services/twitch";
 import Youtube from "../services/youtube";
 
@@ -13,6 +14,11 @@ interface ChatState {
     channelId?: string;
     client?: Youtube;
   };
+  dlive: {
+    connected: boolean;
+    username?: string;
+    client?: Dlive;
+  };
 
   messages: ChatMessage[];
 }
@@ -24,6 +30,9 @@ export const useChatStore = defineStore("chat", {
         connected: false,
       },
       youtube: {
+        connected: false,
+      },
+      dlive: {
         connected: false,
       },
 
@@ -54,6 +63,18 @@ export const useChatStore = defineStore("chat", {
       this.youtube.connected = true;
 
       this.youtube.client.on("chatMessage", (message) => {
+        this.messages.push(message);
+      });
+    },
+    async connectDlive() {
+      if (!this.dlive.username) {
+        throw new Error("Username is required");
+      }
+      this.dlive.client = new Dlive(this.dlive.username);
+      await this.dlive.client.connect();
+      this.dlive.connected = true;
+
+      this.dlive.client.on("chatMessage", (message) => {
         this.messages.push(message);
       });
     },

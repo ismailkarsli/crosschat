@@ -24,25 +24,26 @@ export default class Youtube extends ServiceEmitter {
       axiosInstance: axios.create({ adapter: axiosTauriAdapter }),
     });
 
+    const now = dayjs();
+
     this.ytClient.on("comment", (chat) => {
       if (
-        dayjs(chat.timestamp).add(1, "minute").isBefore(dayjs())
+        dayjs(chat.timestamp).isAfter(now)
         // || chat.author.channelId === GOOGLE_BOT_CHANNEL_ID
-      )
-        return;
-      this.emit("chatMessage", {
-        author: chat.author.name,
-        text: chat.message
-          .reduce((acc, msg) => {
-            console.log(msg);
-            if ("text" in msg) acc.push(msg.text);
-            // else if ("emojiText" in msg) acc.push(msg.emojiText);
-            return acc;
-          }, [] as string[])
-          .join(" "),
-        date: dayjs(chat.timestamp).toISOString(),
-        service: ServiceName.Youtube,
-      });
+      ) {
+        this.emit("chatMessage", {
+          author: chat.author.name,
+          text: chat.message
+            .reduce((acc, msg) => {
+              if ("text" in msg) acc.push(msg.text);
+              // else if ("emojiText" in msg) acc.push(msg.emojiText);
+              return acc;
+            }, [] as string[])
+            .join(" "),
+          date: dayjs(chat.timestamp).toISOString(),
+          service: ServiceName.Youtube,
+        });
+      }
     });
   }
 

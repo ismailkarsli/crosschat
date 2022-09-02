@@ -9,6 +9,8 @@ onMounted(async () => {
   chat.connectTwitch();
   chat.youtube.channelId = "UC9YUii4XC_prj5jqb4u5TUg";
   chat.connectYoutube();
+  chat.dlive.username = "eksi";
+  chat.connectDlive();
 });
 </script>
 

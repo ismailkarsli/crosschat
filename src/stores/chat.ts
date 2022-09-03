@@ -1,82 +1,89 @@
 import { defineStore } from "pinia";
-import Dlive from "../services/dlive";
 import Twitch from "../services/twitch";
 import Youtube from "../services/youtube";
+import Dlive from "../services/dlive";
+import { Store } from "tauri-plugin-store-api";
 
-interface ChatState {
-  twitch: {
-    connected: boolean;
-    channelName?: string;
-    client?: Twitch;
-  };
-  youtube: {
-    connected: boolean;
-    channelId?: string;
-    client?: Youtube;
-  };
-  dlive: {
-    connected: boolean;
-    username?: string;
-    client?: Dlive;
-  };
+const store = new Store(".settings.dat");
+
+interface State {
+  twitchUsername?: string;
+  youtubeChannelId?: string;
+  dliveUsername?: string;
+
+  twitchClient?: Twitch;
+  youtubeClient?: Youtube;
+  dliveClient?: Dlive;
 
   messages: ChatMessage[];
 }
 
 export const useChatStore = defineStore("chat", {
-  state: (): ChatState => {
+  state: (): State => {
     return {
-      twitch: {
-        connected: false,
-      },
-      youtube: {
-        connected: false,
-      },
-      dlive: {
-        connected: false,
-      },
+      twitchUsername: "",
+      youtubeChannelId: "",
+      dliveUsername: "",
+
+      twitchClient: undefined,
+      youtubeClient: undefined,
+      dliveClient: undefined,
 
       messages: [],
     };
   },
 
   actions: {
-    async connectTwitch() {
-      if (!this.twitch.channelName) {
-        throw new Error("Channel name is required");
-      }
-      this.twitch.client = new Twitch(this.twitch.channelName);
-      await this.twitch.client.connect();
-      this.twitch.connected = true;
+    async init() {
+      const twitchUsername = await store.get("twitchUsername");
+      const youtubeChannelId = await store.get("youtubeChannelId");
+      const dliveUsername = await store.get("dliveUsername");
 
-      this.twitch.client.on("chatMessage", (message) => {
-        this.messages.push(message);
-      });
+      if (twitchUsername) this.loadTwitch(twitchUsername as string);
+      if (youtubeChannelId) this.loadYoutube(youtubeChannelId as string);
+      if (dliveUsername) this.loadDlive(dliveUsername as string);
     },
 
-    async connectYoutube() {
-      if (!this.youtube.channelId) {
-        throw new Error("Channel ID is required");
+    async loadTwitch(username: string | undefined) {
+      if (this.twitchClient) {
+        await this.twitchClient.disconnect();
       }
-      this.youtube.client = new Youtube(this.youtube.channelId);
-      await this.youtube.client.connect();
-      this.youtube.connected = true;
+      this.twitchUsername = username;
+      store.set("twitchUsername", username);
 
-      this.youtube.client.on("chatMessage", (message) => {
-        this.messages.push(message);
-      });
+      if (!username) return;
+      this.twitchClient = new Twitch(username);
+      await this.twitchClient.connect();
+      this.twitchClient.on("chatMessage", this.addMessage);
     },
-    async connectDlive() {
-      if (!this.dlive.username) {
-        throw new Error("Username is required");
-      }
-      this.dlive.client = new Dlive(this.dlive.username);
-      await this.dlive.client.connect();
-      this.dlive.connected = true;
 
-      this.dlive.client.on("chatMessage", (message) => {
-        this.messages.push(message);
-      });
+    async loadYoutube(channelId: string | undefined) {
+      if (this.youtubeClient) {
+        await this.youtubeClient.disconnect();
+      }
+      this.youtubeChannelId = channelId;
+      store.set("youtubeChannelId", channelId);
+
+      if (!channelId) return;
+      this.youtubeClient = new Youtube(channelId);
+      await this.youtubeClient.connect();
+      this.youtubeClient.on("chatMessage", this.addMessage);
+    },
+    async loadDlive(username: string | undefined) {
+      if (this.dliveClient) {
+        await this.dliveClient.disconnect();
+      }
+      this.dliveUsername = username;
+      store.set("dliveUsername", username);
+
+      if (!username) return;
+      this.dliveClient = new Dlive(username);
+      await this.dliveClient.connect();
+      this.dliveClient.on("chatMessage", this.addMessage);
+    },
+
+    addMessage(message: ChatMessage) {
+      this.messages.push(message);
     },
   },
 });

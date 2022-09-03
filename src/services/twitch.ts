@@ -43,16 +43,13 @@ export default class Twitch extends ServiceEmitter {
   }
 
   async connect() {
-    try {
-      if (!this.tmiClient) throw new Error("TMI client not initialized");
-      await this.tmiClient.connect();
-    } catch (error) {
-      if (error instanceof Error) {
-        this.emit("error", error);
-      } else {
-        throw new Error(error as string);
-      }
-    }
+    if (!this.tmiClient) throw new Error("TMI client not initialized");
+    await this.tmiClient.connect();
+  }
+
+  async disconnect() {
+    if (!this.tmiClient) throw new Error("TMI client not initialized");
+    await this.tmiClient.disconnect();
   }
 
   async sendMessage(message: string) {

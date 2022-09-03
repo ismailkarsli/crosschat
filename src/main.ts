@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import "./style.css";
+import "./style.scss";
 import App from "./App.vue";
 
 const pinia = createPinia();

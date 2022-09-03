@@ -5,6 +5,6 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(timezone);
 dayjs.extend(utc);
 
-dayjs.tz.setDefault("Europe/London");
+dayjs.tz.setDefault("UTC");
 
 export default dayjs;

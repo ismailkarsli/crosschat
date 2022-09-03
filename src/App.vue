@@ -1,28 +1,25 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import TitleBar from "./components/TitleBar.vue";
+import Chat from "./components/Chat.vue";
 import { useChatStore } from "./stores/chat";
+import { onMounted } from "vue";
 
 const chat = useChatStore();
-
-onMounted(async () => {
-  chat.twitch.channelName = "geryan";
-  chat.connectTwitch();
-  chat.youtube.channelId = "UC9YUii4XC_prj5jqb4u5TUg";
-  chat.connectYoutube();
-  chat.dlive.username = "eksi";
-  chat.connectDlive();
-});
+onMounted(chat.init);
 </script>
 
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
+  <div class="main">
+    <TitleBar />
 
-    <ul>
-      <li v-for="msg in chat.messages">
-        <span>{{ msg.author }} ({{ msg.service }}): </span>
-        <span>{{ msg.text }}</span>
-      </li>
-    </ul>
+    <Chat />
   </div>
 </template>
+
+<style scoped lang="scss">
+.main {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+</style>

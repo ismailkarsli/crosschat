@@ -67,6 +67,10 @@ export default class Youtube extends ServiceEmitter {
     //   streamingDetails.data?.items?.[0]?.liveStreamingDetails?.activeLiveChatId;
   }
 
+  async disconnect() {
+    await this.ytClient.stop();
+  }
+
   async sendMessage(message: string) {
     throw new Error("Method not implemented.");
     //   await axios

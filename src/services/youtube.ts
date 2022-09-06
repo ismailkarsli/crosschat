@@ -1,4 +1,4 @@
-import { ServiceEmitter, ServiceName } from ".";
+import { ServiceEmitter, ServiceName, ServiceStatus } from ".";
 import dayjs from "../plugins/dayjs";
 import { LiveChat } from "youtube-chat";
 import axios from "axios";
@@ -16,6 +16,8 @@ https://accounts.google.com/o/oauth2/v2/auth/identifier
 export default class Youtube extends ServiceEmitter {
   private ytClient!: LiveChat;
   // private liveChatId!: string;
+  public status: ServiceStatus = "disconnected";
+
   constructor(channelId: string) {
     super();
     this.ytClient = new LiveChat({
@@ -50,8 +52,10 @@ export default class Youtube extends ServiceEmitter {
   async connect() {
     const ok = await this.ytClient.start();
     if (!ok) {
+      this.status = "disconnected";
       throw new Error("Could not connect to youtube");
     }
+    this.status = "connected";
     // const streamingDetails = await axios.get(
     //   "https://www.googleapis.com/youtube/v3/videos",
     //   {
@@ -69,6 +73,7 @@ export default class Youtube extends ServiceEmitter {
 
   async disconnect() {
     await this.ytClient.stop();
+    this.status = "disconnected";
   }
 
   async sendMessage(message: string) {

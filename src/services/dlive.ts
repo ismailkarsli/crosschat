@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosTauriAdapter from "axios-tauri-adapter";
-import { ServiceEmitter, ServiceName } from ".";
+import { ServiceEmitter, ServiceName, ServiceStatus } from ".";
 import dayjs from "../plugins/dayjs";
 
 interface DliveChatMessage {
@@ -15,6 +15,7 @@ export default class Dlive extends ServiceEmitter {
   private username: string;
   private interval!: NodeJS.Timeout;
   private lastFetchDate = dayjs();
+  public status: ServiceStatus = "disconnected";
 
   constructor(username: string) {
     super();
@@ -22,10 +23,11 @@ export default class Dlive extends ServiceEmitter {
   }
   async connect() {
     this.interval = setInterval(async () => {
-      const chatroom = await axios.post(
-        "https://graphigo.prd.dlive.tv",
-        {
-          query: `query { 
+      try {
+        const chatroom = await axios.post(
+          "https://graphigo.prd.dlive.tv",
+          {
+            query: `query { 
             userByDisplayName(displayname: "${this.username}") {
               chats(count: 5) {
                 ... on ChatText {
@@ -38,32 +40,36 @@ export default class Dlive extends ServiceEmitter {
               }
             }
           }`,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
           },
-          adapter: axiosTauriAdapter,
-        }
-      );
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            adapter: axiosTauriAdapter,
+          }
+        );
 
-      const chats = chatroom.data.data.userByDisplayName.chats;
+        const chats = chatroom.data.data.userByDisplayName.chats;
 
-      chats.forEach((chat: DliveChatMessage) => {
-        // 19 digit nanoseconds timestamp
-        const date = dayjs(Number(chat.createdAt) / 1000000);
+        chats.forEach((chat: DliveChatMessage) => {
+          // 19 digit nanoseconds timestamp
+          const date = dayjs(Number(chat.createdAt) / 1000000);
 
-        if (dayjs(date).isAfter(this.lastFetchDate)) {
-          this.emit("chatMessage", {
-            text: chat.content,
-            author: chat.sender.username,
-            date: date.toISOString(),
-            service: ServiceName.Dlive,
-          });
-        }
-      });
+          if (dayjs(date).isAfter(this.lastFetchDate)) {
+            this.emit("chatMessage", {
+              text: chat.content,
+              author: chat.sender.username,
+              date: date.toISOString(),
+              service: ServiceName.Dlive,
+            });
+          }
+        });
 
-      this.lastFetchDate = dayjs();
+        this.lastFetchDate = dayjs();
+        this.status = "connected";
+      } catch (e) {
+        this.status = "disconnected";
+      }
     }, 2000);
   }
 

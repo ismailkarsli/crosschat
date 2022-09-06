@@ -1,5 +1,5 @@
 import tmi, { Client } from "tmi.js";
-import { ServiceEmitter, ServiceName } from ".";
+import { ServiceEmitter, ServiceName, ServiceStatus } from ".";
 import dayjs from "../plugins/dayjs";
 
 const { TWITCH_BOT_USERNAME, TWITCH_BOT_ACCESS_TOKEN } = import.meta.env;
@@ -15,6 +15,7 @@ https://id.twitch.tv/oauth2/authorize
 export default class Twitch extends ServiceEmitter {
   private tmiClient: Client | undefined;
   private channelName!: string;
+  public status: ServiceStatus = "disconnected";
 
   constructor(channelName: string) {
     super();
@@ -45,11 +46,13 @@ export default class Twitch extends ServiceEmitter {
   async connect() {
     if (!this.tmiClient) throw new Error("TMI client not initialized");
     await this.tmiClient.connect();
+    this.status = "connected";
   }
 
   async disconnect() {
     if (!this.tmiClient) throw new Error("TMI client not initialized");
     await this.tmiClient.disconnect();
+    this.status = "disconnected";
   }
 
   async sendMessage(message: string) {

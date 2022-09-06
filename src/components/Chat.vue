@@ -2,32 +2,48 @@
 import { ServiceName } from "../services";
 import { useChatStore } from "../stores/chat";
 import randomColor from "randomcolor";
-import { nextTick, onBeforeUpdate, onMounted, onUpdated } from "vue";
+import { nextTick, onMounted, onUpdated, watch, watchEffect } from "vue";
 
 const chat = useChatStore();
 const usernameColors = $ref(new Map<string, string>());
 let scrollEnd = $ref(true);
 const messageList = $ref<HTMLElement | null>(null);
+let missedMessages = $ref(0);
 
 onUpdated(() => {
   if (!messageList) return;
   nextTick(() => {
-    if (scrollEnd) {
-      messageList.scrollTop = messageList.scrollHeight;
-    }
+    if (scrollEnd) scrollToEnd();
   });
 });
 
-onBeforeUpdate(() => {
+const scrollToEnd = () => {
   if (!messageList) return;
-  scrollEnd =
-    messageList.scrollHeight - messageList.scrollTop ===
-    messageList.clientHeight;
-});
+  messageList.scrollTop = messageList.scrollHeight;
+  scrollEnd = true;
+};
 
 onMounted(() => {
   if (!messageList) return;
-  messageList.scrollTop = messageList.scrollHeight;
+  scrollToEnd();
+
+  messageList.addEventListener("scroll", () => {
+    scrollEnd =
+      messageList.scrollHeight - messageList.scrollTop ===
+      messageList.clientHeight;
+  });
+});
+
+watch(chat.messages, () => {
+  if (!scrollEnd) {
+    missedMessages++;
+  }
+});
+
+watchEffect(() => {
+  if (scrollEnd) {
+    missedMessages = 0;
+  }
 });
 
 const usernameColor = (username: string, platform: ServiceName) => {
@@ -75,6 +91,11 @@ const platformIcon: { [key in ServiceName]: string } = {
       </span>
       <span>{{ msg.text }}</span>
     </li>
+    <div v-if="!scrollEnd && missedMessages" class="scroll-notification">
+      <button type="button" @click="scrollToEnd">
+        You missed {{ missedMessages }} messages
+      </button>
+    </div>
   </ul>
   <div class="no-messages" v-else>
     <p>No messages yet.</p>
@@ -107,5 +128,22 @@ const platformIcon: { [key in ServiceName]: string } = {
   align-items: center;
   height: 100%;
   font-size: 1.5rem;
+}
+
+.scroll-notification {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  display: flex;
+  justify-content: flex-end;
+  button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
 }
 </style>

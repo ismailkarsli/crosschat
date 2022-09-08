@@ -2,7 +2,7 @@
 import { ServiceName } from "../services";
 import { useChatStore } from "../stores/chat";
 import randomColor from "randomcolor";
-import { nextTick, onMounted, onUpdated, watch, watchEffect } from "vue";
+import { onBeforeUpdate, onUpdated } from "vue";
 
 const chat = useChatStore();
 const usernameColors = $ref(new Map<string, string>());
@@ -10,39 +10,29 @@ let scrollEnd = $ref(true);
 const messageList = $ref<HTMLElement | null>(null);
 let missedMessages = $ref(0);
 
-onUpdated(() => {
-  if (!messageList) return;
-  nextTick(() => {
-    if (scrollEnd) scrollToEnd();
-  });
-});
-
 const scrollToEnd = () => {
   if (!messageList) return;
   messageList.scrollTop = messageList.scrollHeight;
   scrollEnd = true;
+  missedMessages = 0;
 };
 
-onMounted(() => {
+onUpdated(() => {
   if (!messageList) return;
-  scrollToEnd();
-
-  messageList.addEventListener("scroll", () => {
-    scrollEnd =
-      messageList.scrollHeight - messageList.scrollTop ===
-      messageList.clientHeight;
-  });
+  if (scrollEnd) scrollToEnd();
 });
 
-watch(chat.messages, () => {
-  if (!scrollEnd) {
-    missedMessages++;
-  }
-});
+onBeforeUpdate(() => {
+  if (!messageList) return;
 
-watchEffect(() => {
+  scrollEnd =
+    messageList.scrollHeight - messageList.scrollTop ===
+    messageList.clientHeight;
+
   if (scrollEnd) {
     missedMessages = 0;
+  } else {
+    missedMessages++;
   }
 });
 
@@ -104,7 +94,7 @@ const platformIcon: { [key in ServiceName]: string } = {
 
 <style scoped lang="scss">
 .message-list {
-  overflow-y: scroll;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: 0.5rem;

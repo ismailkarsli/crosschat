@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "crosschat",
-    "version": "0.0.0"
+    "version": "0.0.2"
   },
   "tauri": {
     "allowlist": {
